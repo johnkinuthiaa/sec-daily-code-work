@@ -3,22 +3,24 @@ package com.sec.secdailycodework.service;
 import com.sec.secdailycodework.dto.RegistrationRequest;
 import com.sec.secdailycodework.models.User;
 import com.sec.secdailycodework.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+
 @Service
 public class UserService implements UserServiceInterface{
-    private final UserRepository repository;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository repository, UserRepository userRepository){
-        this.repository=repository;
+    public UserService( UserRepository userRepository,PasswordEncoder passwordEncoder){
         this.userRepository = userRepository;
+        this.passwordEncoder=passwordEncoder;
     }
     @Override
     public List<User> getUsers() {
-        return repository.findAll();
+        return userRepository.findAll();
     }
 
     @Override
@@ -27,11 +29,19 @@ public class UserService implements UserServiceInterface{
         if(user.isPresent()){
             throw new RuntimeException("user with email"+request.email()+" already exists");
         }
-        return null;
+        var newUser =new User();
+        newUser.setFirstName(request.firstName());
+        newUser.setLastName(request.lastName());
+        newUser.setEmail(request.email());
+        newUser.setPassword(passwordEncoder.encode(request.password()));
+        newUser.setRole(request.role());
+        userRepository.save(newUser);
+
+        return newUser;
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
-        return repository.findByEmail(email);
+        return userRepository.findByEmail(email);
     }
 }
