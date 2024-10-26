@@ -27,4 +27,8 @@ public class RegistrationController {
         publisher.publishEvent(new RegistrationCompleteEvent(user,applicationUrl(request)));
         return "success! please check your email for verification";
     }
+
+    public  String applicationUrl(HttpServletRequest request) {
+        return "http://"+request.getServerName()+":"+request.getServerPort()+request.getContextPath();
+    }
 }
